@@ -1,0 +1,82 @@
+#+title: agent-shell-desktop.el
+#+author: Tim Felgentreff
+
+Persist active [[https://github.com/xenodium/agent-shell][agent-shell]] sessions with Emacs Desktop.
+
+This package saves active =agent-shell-mode= buffers into the normal Desktop
+state and restores them with the same agent config, working directory, session
+ID, and buffer name on the next Emacs startup.
+
+* Requirements
+
+- Emacs 29.1 or newer
+- =agent-shell= 0.50.1 or newer
+- =desktop=, which ships with Emacs
+
+This package uses internal =agent-shell= APIs because Agent Shell does not
+currently expose a public Desktop restore entry point. Specifically
+
+- =agent-shell--state= to get the session id and agent-config id
+- =agent-shell--start= because the public API does not allow launching
+  the shell without it taking focus
+
+* Installation
+
+With =package-vc-install=:
+
+#+begin_src emacs-lisp
+  (package-vc-install
+   '(agent-shell-desktop
+     :url "https://github.com/timfel/agent-shell-desktop.el"))
+#+end_src
+
+With =use-package= and =package-vc=:
+
+#+begin_src emacs-lisp
+  (use-package agent-shell-desktop
+    :vc (:url "https://github.com/timfel/agent-shell-desktop.el")
+    :after (agent-shell desktop)
+    :config
+    (agent-shell-desktop-mode 1))
+#+end_src
+
+Manual installation:
+
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/agent-shell-desktop.el")
+  (require 'agent-shell-desktop)
+  (agent-shell-desktop-mode 1)
+#+end_src
+
+* Usage
+
+Load and enable =agent-shell-desktop-mode= before Desktop restores buffers:
+
+#+begin_src emacs-lisp
+  (require 'agent-shell)
+  (require 'agent-shell-desktop)
+  (agent-shell-desktop-mode 1)
+
+  (desktop-save-mode 1)
+#+end_src
+
+Only Agent Shell buffers with an active session ID are saved. Deferred sessions
+that have not been initialized yet are skipped.
+
+* Development
+
+Run tests against a local Agent Shell checkout:
+
+#+begin_src sh
+  make test AGENT_SHELL_DIR=/path/to/agent-shell
+#+end_src
+
+Byte-compile the package:
+
+#+begin_src sh
+  make compile AGENT_SHELL_DIR=/path/to/agent-shell
+#+end_src
+
+* License
+
+GPL-3.0-or-later. See [[file:LICENSE][LICENSE]].

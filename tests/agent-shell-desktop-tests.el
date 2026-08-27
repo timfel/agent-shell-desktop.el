@@ -85,6 +85,16 @@
                       #'agent-shell-desktop--save-buffer))))
     (agent-shell-desktop-mode -1)))
 
+(ert-deftest agent-shell-desktop-resolves-config-makers ()
+  "Desktop restore should resolve modern Agent Shell config makers."
+  (let ((agent-shell-agent-configs
+         (list (lambda ()
+                 '((:identifier . codex)
+                   (:buffer-name . "Codex"))))))
+    (should (equal (agent-shell-desktop--config 'codex)
+                   '((:identifier . codex)
+                     (:buffer-name . "Codex"))))))
+
 (ert-deftest agent-shell-desktop-restore-reuses-existing-session-buffer ()
   "Desktop restore should not create a duplicate for an already-live session."
   (let ((buffer (generate-new-buffer " *agent-shell-desktop-existing*"))
@@ -98,6 +108,8 @@
           (setq major-mode 'agent-shell-mode)
           (setq-local agent-shell--state
                       (agent-shell-desktop-tests--state "session-123"))
+          ;; `agent-shell-buffers' only returns fully initialized shells.
+          (setq-local shell-maker--config t)
           (should
            (eq (agent-shell-desktop--restore-buffer
                 nil "restored"

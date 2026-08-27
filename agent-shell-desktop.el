@@ -127,7 +127,13 @@ DESKTOP-DIRECTORY is the directory where Desktop writes its state."
   "Return the Agent Shell config matching CONFIG-ID."
   (seq-find (lambda (candidate)
               (eq (map-elt candidate :identifier) config-id))
-            agent-shell-agent-configs))
+            ;; Recent Agent Shell versions store config-maker functions in
+            ;; `agent-shell-agent-configs'; older versions stored concrete
+            ;; config alists there.  Use the resolver when available so both
+            ;; representations remain supported.
+            (if (fboundp #'agent-shell--resolved-agent-configs)
+                (agent-shell--resolved-agent-configs)
+              agent-shell-agent-configs)))
 
 (defun agent-shell-desktop--restore-message-buffer (buffer-name message)
   "Return a scratch BUFFER-NAME containing Desktop restore MESSAGE."
